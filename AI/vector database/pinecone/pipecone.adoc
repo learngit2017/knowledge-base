@@ -1,0 +1,86 @@
+== What is Pinecone
+https://docs.pinecone.io/guides/getting-started/overview[Pinecone] is a vector database
+
+== Indexes vs Collections
+* Index: an index is the highest-level organizational unit of vector data in Pinecone. It accepts and stores vectors, serves queries over the vectors it contains, and does other vector operations over its contents.
+* Collection: a collection is a static copy of an index. It is a non-queryable representation of a set of vectors and metadata.
+* You can create a collection from an index (with different metric or pod type), and you can create a new index from a collection.
+
+== Index management
+* Create
+
+[source,python,indent=0]
+----
+pc.create_index("index_name")
+----
+pc is short for pinecone footnote:[import pinecone as pc]
+
+* Read
+
+[source,python,indent=0]
+----
+pc.list_indexes()
+pc.describe_index("index_name")
+----
+
+* Update
+
+[source,python,indent=0]
+----
+idx = pc.Index("index_name")
+idx.upsert(), idx.query(), idx.fetch(), idx.update(), idx.delete()
+----
+
+* Delete
+
+[source,python,indent=0]
+----
+pc.delete_index("index_name")
+----
+
+== Collection management
+* Create
+
+[source,python,indent=0]
+----
+pc.create_collection(name="collection_name", source="index_name")
+----
+
+* Read
+
+[source,python,indent=0]
+----
+pc.list_collections()
+pc.describe_collection("collection_name")
+----
+
+* Delete
+
+[source,python,indent=0]
+----
+pc.delete_collections("collection_name")
+----
+
+== Metric type
+metric is used to measure distance in Vector Spaces
+
+* Cosine Distance
+  ** Normalized, values are from -1 to 1
+  ** Measure angular distances
+  ** Cosine Similarity (余弦相似度)  = 1- Cosine Distance (余弦距离)
+
+* Euclidean Distance, 欧几里得距离
+  ** Calculates shortest distance between vectors
+  ** Lowest score vector is closest to the query vector
+  ** Values can be between 0 to infinity
+
+* Dot Product, 点积
+
+== Vector Partitioning
+vector partitioning can achieve by
+
+* using namespace, `vector` can save in same `index` with different `namespace`
+* using separate index
+* using metadata
+
+
