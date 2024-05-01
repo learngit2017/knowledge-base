@@ -1,13 +1,13 @@
 = Flask
 
 == Basics
-=== Initialize Flask instance
+=== Initialize Flask Instance
 ----
 from flask import Flask
 app = Flask(__name__)
 ----
 
-TIP: Flask uses +++__name__+++ to determine the location of the application, which in turn allows it to locate other files that are part of the application, such as images and templates.
+TIP: Flask uses +++__name__+++ to determine the location of the application, which in turn allows it to locate other files that are part of the application, such as static (like images) and templates.
 
 === Routes and View Functions
 [source,python]
@@ -46,7 +46,7 @@ The dynamic components in routes are strings by default but can also be of diffe
 * `float`
 * `path`, is a special string type that can include forward slashes
 
-=== Flask commands
+=== Flask Commands
 
 [source,python]
 ----
@@ -119,7 +119,7 @@ Use `app_context()` function to access application context outside view function
 [source,python]
 ----
 # app is Flask instance here
-with app.app_context():
+with app.app_context() as ctx:
   ...
 ----
 
@@ -298,7 +298,7 @@ def internal_server_error(e):
 ----
 
 
-=== Template
+=== Jinja2 Template
 
 .`render_template` function
 [source,python]
@@ -400,7 +400,7 @@ Hello, Stranger!
 
 ** reuse templates
 +
-.include common template
+.template composition
 [source,html]
 ----
 {% include 'common.html' %}
@@ -409,6 +409,8 @@ Hello, Stranger!
 +
 [source,html]
 ----
+<!-- base page -->
+
 <html>
 <head>
     {% block head %}
@@ -424,6 +426,8 @@ Hello, Stranger!
 +
 [source,html]
 ----
+<!-- inherited page -->
+
 {% extends "base.html" %}
 {% block title %}Index{% endblock %}
 {% block head %}
