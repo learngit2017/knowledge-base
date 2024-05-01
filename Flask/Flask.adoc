@@ -1,0 +1,502 @@
+= Flask
+
+== Basics
+=== Initialize Flask instance
+----
+from flask import Flask
+app = Flask(__name__)
+----
+
+TIP: Flask uses +++__name__+++ to determine the location of the application, which in turn allows it to locate other files that are part of the application, such as images and templates.
+
+=== Routes and View Functions
+[source,python]
+.Add route by decorator
+----
+@app.route('/')
+def index():
+    return '<h1>Hello World!</h1>'
+----
+
+[source,python]
+.Add route by method
+----
+def index():
+    return '<h1>Hello World!</h1>'
+
+# 1st parameter, / is the path
+# 2nd parameter, 'index' is the endpoint ID
+# 3rd parameter is the view function
+app.add_url_rule('/', 'index', index)
+----
+
+=== Dynamic Routes
+[source,python]
+.Use <> to indicate path variable
+----
+@app.route('/user/<name>')
+def user(name):
+    return '<h1>Hello, {}!</h1>'.format(name)
+----
+
+The dynamic components in routes are strings by default but can also be of different types. For example, the route /user/<int:id> would match only URLs that have an integer in the id dynamic segment, such as /user/123. Flask supports types:
+
+* `string`
+* `int`
+* `float`
+* `path`, is a special string type that can include forward slashes
+
+=== Flask commands
+
+[source,python]
+----
+@app.cli.command()
+def test():
+    """Run the unit tests."""
+    import unittest
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
+----
+
+[source,bash]
+----
+flask test
+----
+
+=== Development Web Server
+[source,bash]
+.Start by shell script
+----
+export FLASK_APP=hello.py
+flask run
+----
+
+[source,python]
+.Start programmatically
+----
+if __name__ == '__main__':
+    app.run()
+----
+
+=== Start Development Web Server in Debug Mode
+.shell script
+----
+export FLASK_DEBUG=1
+----
+
+[source,python]
+.programmatically
+----
+app.run(debug=True)
+----
+
+=== Application and Request Contexts
+Flask uses `contexts` to temporarily make certain objects globally accessible to a thread without interfering with the other threads.
+
+*Flask context globals*
+
+|===
+|Variable name |Context |Description
+
+|current_app
+|Application context
+|The application instance for the active application. This is a proxy to the application instance handling the current request
+
+|g
+|Application context
+|An object that the application can use for temporary storage during the handling of a request. This variable is reset with each request.
+
+|request
+|Request context
+|The request object, which encapsulates the contents of an HTTP request sent by the client.
+
+|session
+|Request context
+|The user session, a dictionary that the application can use to store values that are “remembered” between requests.
+|===
+
+Use `app_context()` function to access application context outside view function
+[source,python]
+----
+# app is Flask instance here
+with app.app_context():
+  ...
+----
+
+*The Request Object*
+
+|===
+|Attribute or Method |Description
+
+|form
+|A dictionary with all the form fields submitted with the request.
+
+|args
+|A dictionary with all the arguments passed in the query string of the URL.
+
+|values
+|A dictionary that combines the values in form and args.
+
+|cookies
+|A dictionary with all the cookies included in the request.
+
+|headers
+|A dictionary with all the HTTP headers included in the request.
+
+|files
+|A dictionary with all the file uploads included with the request.
+
+|get_data()
+|Returns the buffered data from the request body.
+
+|get_json()
+|Returns a Python dictionary with the parsed JSON included in the body of the request.
+
+|blueprint
+|The name of the Flask blueprint that is handling the request.
+
+|endpoint
+|The name of the Flask endpoint that is handling the request. Flask uses the name of the view function as the endpoint name for a route.
+
+|method
+|The HTTP request method, such as GET or POST.
+
+|scheme
+|The URL scheme (http or https).
+
+|is_secure()
+|Returns True if the request came through a secure (HTTPS) connection.
+
+|host
+|The host defined in the request, including the port number if given by the client.
+
+|path
+|The path portion of the URL.
+
+|query_string
+|The query string portion of the URL, as a raw binary value.
+
+|full_path
+|The path and query string portions of the URL.
+
+|url
+|The complete URL requested by the client.
+
+|base_url
+|Same as url, but without the query string component.
+
+|remote_addr
+|The IP address of the client.
+
+|environ
+|The raw WSGI environment dictionary for the request.
+|===
+
+*Request Hook*
+
+Request hooks are implemented as decorators
+|===
+|Hook Name |Description
+
+|before_first_request
+|Registers a function to run only before the first request is handled. This can be a convenient way to add server initialization tasks.
+
+|before_request
+|Registers a function to run before each request
+
+|after_request
+|Registers a function to run after each request, but only if no unhandled exceptions occurred.
+
+|teardown_request
+|Registers a function to run after each request, even if unhandled exceptions occurred.
+
+|===
+
+*Responses*
+
+.return a tuple: html (1st), status code (2nd), a dict for headers (3rd)
+[source,python]
+----
+@app.route('/')
+def index():
+    return '<h1>Bad Request</h1>', 400
+----
+
+.use make_response
+[source,python]
+----
+from flask import make_response
+
+@app.route('/')
+def index():
+    response = make_response('<h1>This document carries a cookie!</h1>')
+    response.set_cookie('answer', '42')
+    return response
+----
+
+|===
+|Attribute or Method |Description
+
+|status_code
+|The numeric HTTP status code
+
+|headers
+|A dictionary-like object with all the headers that will be sent with the response
+
+|set_cookie()
+|Adds a cookie to the response
+
+|delete_cookie()
+|Removes a cookie
+
+|content_length
+|The length of the response body
+
+|content_type
+|The media type of the response body
+
+|set_data()
+|Sets the response body as a string or bytes value
+
+|get_data()
+|Gets the response body
+|===
+
+.redirect
+[source,python]
+----
+from flask import redirect
+
+@app.route('/')
+def index():
+    return redirect('http://www.example.com')
+----
+
+.abort
+[source,python]
+----
+from flask import abort
+
+@app.route('/user/<id>')
+def get_user(id):
+    user = load_user(id)
+    if not user:
+        abort(404)
+    return '<h1>Hello, {}</h1>'.format(user.name)
+----
+
+.error handler
+[source,python]
+----
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+----
+
+
+=== Template
+
+.`render_template` function
+[source,python]
+----
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/user/<name>')
+def user(name):
+    return render_template('user.html', name=name)
+----
+
+* *Variable*
+  ** use `{{ name }}` construct, can be any type, even lists, dicts and objects
+  ** `Variables` can be modified with `filters`, which are added after variable name with a pipe character as separator
+[source,python]
+----
+Hello, {{ name|capitalize }}
+----
+
+|===
+|Filter Name |Description
+
+|safe
+|Renders the value without applying escaping
+
+|capitalize
+|Converts the first character of the value to uppercase and the rest to lowercase
+
+|lower
+|Converts the value to lowercase characters
+
+|upper
+|Converts the value to uppercase characters
+
+|title
+|Capitalizes each word in the value
+
+|trim
+|Removes leading and trailing whitespace from the value
+
+|striptags
+|Removes any HTML tags from the value before rendering
+|===
+
+TIP: By default Jinja2 escapes all variables for security purposes. For example, if a variable is set to the value '<h1>Hello</h1>', Jinja2 will render the string as '\&lt;h1\&gt;Hello\&lt;/h1\&gt;'
+ `safe` avoid escaping
+
+* *Control Structures*
+
+** branch
++
+[source,html]
+----
+{% if user %}
+Hello, {{ user }}!
+{% else %}
+Hello, Stranger!
+{% endif %}
+----
+
+** for loop
++
+[source,html]
+----
+<ul>
+    {% for comment in comments %}
+        <li>{{ comment }}</li>
+    {% endfor %}
+</ul>
+----
+
+** macro, like function
++
+[source,html]
+----
+{% macro render_comment(comment) %}
+    <li>{{ comment }}</li>
+{% endmacro %}
+
+<ul>
+    {% for comment in comments %}
+        {{ render_comment(comment) }}
+    {% endfor %}
+</ul>
+----
++
+.macro can be imported from other templates
+[source,html]
+----
+{% import 'macros.html' as macros %}
+<ul>
+    {% for comment in comments %}
+        {{ macros.render_comment(comment) }}
+    {% endfor %}
+</ul>
+----
+
+** reuse templates
++
+.include common template
+[source,html]
+----
+{% include 'common.html' %}
+----
+.template inheritance
++
+[source,html]
+----
+<html>
+<head>
+    {% block head %}
+    <title>{% block title %}{% endblock %} - My Application</title>
+    {% endblock %}
+</head>
+<body>
+    {% block body %}
+    {% endblock %}
+</body>
+</html>
+----
++
+[source,html]
+----
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+    </style>
+{% endblock %}
+{% block body %}
+<h1>Hello, World!</h1>
+{% endblock %}
+----
++
+derived template can call `super()` to reference the contents of the block in the base template
+
+=== Links
+`url_for()` helper function, which generates URLs from the information stored in the application’s URL map +
+
+this function takes the view function name (or endpoint name for routes defined with app.add_url_route()) as its single argument and returns its URL +
+
+* *url_for('index')* would return relative URL, i.e. /
+* *url_for('index', _external=True)* would return absolute URL, i.e. http://localhost:5000/
+
+=== Static Files
+Flask automatically supports static files by adding a special route to the application defined as `/static/<filename>`
+
+* `url_for('static', filename='css/styles.css', _external=True)` would return http://localhost:5000/static/css/styles.css
+
+[source,html]
+.example
+----
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
+    type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
+    type="image/x-icon">
+{% endblock %}
+----
+
+=== Blueprints
+[source,python]
+----
+from flask import Blueprint
+
+main = Blueprint('main', __name__)
+----
+[source,python]
+----
+def create_app(config_name):
+# ...
+
+    from .main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    return app
+----
+
+[source,python]
+.register with `url_prefix`
+----
+app.register_blueprint(auth_blueprint, url_prefix='/auth')
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+

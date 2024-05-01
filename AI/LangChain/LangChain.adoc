@@ -26,6 +26,7 @@ image::architecture.png[]
 * Agent
   ** Agents, on the other hand, leverage a language model as a reasoning engine to determine which actions to take and in what order.
   ** Instead of fixed sequences, agents use the language model to *dynamically* choose actions based on context, user input, and other relevant factors.
+  ** Agents select and use `Tools` and `Toolkits` for actions.
 
 == Building with LangChain
 === Chains
@@ -187,6 +188,165 @@ The `input type` and `output type` by components:
 |Depends on the tool
 |===
 
+=== RunnableSequence, sequentially chaining runnables
+This can be done using the pipe operator (`|`), or the more explicit `pipe()` method. The resulting `RunnableSequence` is itself a runnable, which means it can be invoked, streamed, or piped just like any other runnable.
+
+[source,python]
+.Chaining example
+----
+composed_chain_with_lambda = (
+    chain                               # start from a chain
+    | (lambda input: {"joke": input})   # Convert to RunnableLambda
+    | analysis_prompt
+    | model
+    | StrOutputParser()
+)
+----
+
+=== RunnableParallel, parallel chaining runnables
+The `RunnableParallel` primitive is essentially a dict whose values are runnables (or things that can be coerced to runnables, like functions). It runs all of its values in parallel, and each value is called with the overall input of the RunnableParallel. The final return value is a dict with the results of each value under its appropriate key.
+
+[source,python]
+.Parallel runnable example
+----
+retrieval_chain = (
+# a dict is a RunnableParallel, its return is also a dict
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt
+    | model
+    | StrOutputParser()
+)
+----
+
+----
+RunnableParallel(context=retriever, question=RunnablePassthrough())
+----
+
+=== RunnablePassthrough
+Pass through the input as output. +
+`RunnablePassthrough.assign()`, in addition to the passthrough value, add a new key with value from a (lambda) function
+
+[source,python]
+.RunnablePassthrough.assign()
+----
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+
+runnable = RunnableParallel(
+    passed=RunnablePassthrough(),
+    extra=RunnablePassthrough.assign(mult=lambda x: x["num"] * 3),
+    modified=lambda x: x["num"] + 1,
+)
+
+runnable.invoke({"num": 1})
+
+"""
+return is {'passed': {'num': 1}, 'extra': {'num': 1, 'mult': 3}, 'modified': 2}
+"""
+----
+
+=== Using itemgetter as shorthand
+you can use Python’s `itemgetter` as shorthand to extract data from the map when combining with `RunnableParallel`
+
+[source,python]
+.itemgetter example
+----
+from operator import itemgetter
+
+from langchain_community.vectorstores import FAISS
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+vectorstore = FAISS.from_texts(
+    ["harrison worked at kensho"], embedding=OpenAIEmbeddings()
+)
+retriever = vectorstore.as_retriever()
+
+template = """Answer the question based only on the following context:
+{context}
+
+Question: {question}
+
+Answer in the following language: {language}
+"""
+prompt = ChatPromptTemplate.from_template(template)
+
+chain = (
+    {
+        "context": itemgetter("question") | retriever,
+        "question": itemgetter("question"),
+        "language": itemgetter("language"),
+    }
+    | prompt
+    | model
+    | StrOutputParser()
+)
+
+chain.invoke({"question": "where did harrison work", "language": "italian"})
+----
+
+=== Parallelize steps
+RunnableParallel (aka. RunnableMap) makes it easy to execute multiple Runnables in parallel, and to return the output of these Runnables as a map.
+[source,python]
+.Parallelization example
+----
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableParallel
+from langchain_openai import ChatOpenAI
+
+model = ChatOpenAI()
+joke_chain = ChatPromptTemplate.from_template("tell me a joke about {topic}") | model
+poem_chain = (
+    ChatPromptTemplate.from_template("write a 2-line poem about {topic}") | model
+)
+
+map_chain = RunnableParallel(joke=joke_chain, poem=poem_chain)
+
+map_chain.invoke({"topic": "bear"})
+----
+
+[source,python]
+.result returns in a dict
+----
+{'joke': AIMessage(content="Why don't bears wear shoes?\n\nBecause they have bear feet!"),
+ 'poem': AIMessage(content="In the wild's embrace, bear roams free,\nStrength and grace, a majestic decree.")}
+----
+
+== Model I/O
+Formatting and managing language model input and output
+
+* Prompts
+* Chat models
+* LLMs
+* Output parsers
+
+=== Prompts
+A prompt for a language model is a set of instructions or input provided by a user to guide the model's response, helping it understand the context and generate relevant and coherent language-based output
+
+* few-shot examples prompts
+* example selectors
+* partial prompts
+* compose prompts together
 
 
+== Retrieval
+Interface with application-specific data for e.g. RAG
 
+* Document loaders
+* Text splitters
+* Embedding models
+* vectorstores
+* Retrievers
+
+== Composition
+Higher-level components that combine other arbitrary systems and LangChain primitives together
+
+* Tools
+* Agents
+* Chains
+
+== Additional
+
+* Memory
+* Callbacks
