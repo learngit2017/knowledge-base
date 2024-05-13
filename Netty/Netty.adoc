@@ -1,0 +1,22 @@
+= Netty
+
+== Multiplexing (多路复用）
+单线程可以配合``Selector``完成对多个Channel可读写事件的监控，这称之为``多路复用``
+
+* 多路复用仅针对网络IO，文件IO没法利用多路复用
+* 如果不用Selector的非阻塞模式，线程大部分时间都在做无用功，而Selector能够保证
+** 有可连接事件才去连接
+** 有可读事件才去读取
+** 有可写事件才去写入
+*** 限于网络传输能力，Channel未必时时可写，一旦Channel可写，会触发Selector的可写事件
+
+
+``Selector.select()``何时不阻塞
+
+* 事件发生时
+** 客户端发起连接请求，会触发accept事件
+** 客户端发送数据过来，客户端正常、异常关闭时，都会触发read事件，另外如果发送的数据大于buffer缓冲区，会触发多次读取事件
+** channel可写，会触发write事件
+* 调用``selector.wakeup()``
+* 调用``selector.close()``
+* selector所在线程interrupt
