@@ -1,0 +1,158 @@
+= OOP
+
+
+== class
+=== define classes
+
+[source,python]
+.define class in traditional way
+----
+clsss Foo:
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        ...
+
+    def __init__(self, *args, **kwargs):
+        ...
+----
+
+[source,python]
+.define class with `type` class
+----
+# 1st parameter is class name
+# 2nd parameter is a tuple of base classes
+# 3rd parameter is a dict of class attributes
+# type is the metaclass here, it can be custom metaclass
+Foo = type("Foo", (object,), {"v1": 123, "func": lambda self:666})
+----
+
+=== \\__new__ and \\__init__ methods
+
+* `\\__new__` is to create the object instance, it is `@staticmethod` method
+* `\\__init__` is to initialize the object instance, it is instance method
+
+[source,python]
+.example
+----
+class Human:
+
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls)
+
+    def __init__(self, nationality):
+        self._nationality = nationality
+
+    def nationality(self):
+        print(f'nationality is {self._nationality}')
+
+
+class Man(Human):
+
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls, *args, **kwargs)
+
+    def __init__(self, nationality, age):
+        super().__init__(nationality)
+        self._age = age
+
+
+    def age(self):
+        print(f'age is {self._age}')
+
+
+
+man = Man("China", 23)
+man.nationality()
+man.name()
+----
+
+[source,python]
+.example with `type`
+----
+def human__init__(self, nationality):
+    self._nationality = nationality
+
+
+def man__init__(self, nationality, age):
+    human__init__(self, nationality)
+    self._age = age
+
+
+Human = type("Human", (), {
+    "__init__": human__init__,
+    "nationality": lambda self: print(f'nationality is {self._nationality}')
+})
+
+Man = type("Man", (Human, ), {
+    "__init__": man__init__,
+    "age": lambda self: print(f'age is {self._age}')
+})
+
+
+
+man = Man("China", 23)
+man.nationality()
+man.age()
+----
+
+== metaclass
+
+metaclass is
+
+* class inherit from `type`
+* use to create python  class
+
+[source,python]
+.example to use metaclass to customize class creation
+----
+class MyMetaClass(type):
+    # cls is MyMetaClass, i.e the class of MyClass
+    # name is the class name under construction, i.e. "MyClass" here
+    # bases is tuple of base class of MyClass
+    # attrs is dict of attributes of MyClass
+    @staticmethod
+    def __new__(cls, name, bases, attrs):
+        return super().__new__(cls, name, bases, attrs)
+
+    # self is MyClass, the class object being created
+    # name is the class name under construction, i.e. "MyClass" here
+    # bases is tuple of base class of MyClass
+    # attrs is dict of attributes of MyClass
+    def __init__(self, name, bases, attrs):
+        # you can customize the class object, like adding a attribute here
+        self.common_properties = 'common_properties_value'
+        super().__init__(name, bases, attrs)
+
+    # you don't usually need define __call__, it is for demo purpose here
+    def __call__(self, *args, **kwargs):
+        print("MyMetaClass__call__ is called")
+        instance = self.__new__(self, *args, **kwargs)
+        instance.__init__(*args, **kwargs)
+        return instance
+
+class MyClass(metaclass=MyMetaClass):
+
+    # cls is MyClass, i.e the class of the object under creation
+    # *args and **kwargs are parameters passed in class construcctor
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        # object.__new__ only accept one parameter
+        print("MyClass.__new__ is called")
+        instance = super().__new__(cls)
+        return instance
+
+    def __init__(self, age):
+        print("MyClass.__init__ is called")
+        self._age = age
+
+    def hello(self):
+        print("Hello, world!")
+
+
+# calling class's constructor is actually calling metaclass.__call__ method,
+# within metaclass.__call__ method, it calls the class.__new__ and class.__init__ methods
+a = MyClass(33)
+a.hello()
+----
