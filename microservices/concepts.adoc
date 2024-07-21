@@ -1,0 +1,22 @@
+= Microservices concepts
+
+* 服务治理 (service governance)
+** 服务注册 (service registration)
+** 服务发现 (service discovery)
+*** 客户端发现机制
+*** 服务器端发现机制
+
+* 负载均衡 (load balancing)
+** 客户端负载均衡, like Ribbon, spring-cloud-load-balancer
+** 服务器端负载均衡
+
+* 服务容错 (fault tolerance)
+** 集群容错策略 (multiple service provider instances & load balancer)
+*** fail over (失效转移)
+*** fail back (失败通知)
+*** fail safe (失败安全)
+*** fail fast (快速失败)
+** 服务隔离机制 (service isolation)
+*** 线程池隔离 (thread pool)
+** 服务限流机制 (rate limit)
+** 服务熔断机制 (circuit breaker)

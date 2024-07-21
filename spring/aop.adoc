@@ -1,0 +1,39 @@
+= Aspect Oriented Programming
+
+== Annotation
+
+* @EnableAspectJAutoProxy, to import AspectJAutoProxyRegistrar and enable Spring AOP capability
+* @Aspect, define aspect class. Use in conjunction with @Component to register as a Spring bean
+* @PointCut, define point cut
+* @Before, @After, @AfterReturning, @AfterThrowing, @Around
+* @DeclareParents
+
+== Concepts & Terminology
+
+* Target (目标类)
+* Proxy (代理)
+* JointPoint (连接点) +
+  Represents a candidate point in your application’s execution where an aspect can be plugged in.
+* PointCut (切点) +
+  A predicate that matches join points. Defines where the associated advice (aspect behavior) should be applied.
+* Advice (增强)
+** Before Advice
+** After Returning Advice
+** After Throwing Advice
+** After Advice (finally)
+** Around Advice
+** Introduction Advice
+* Advisor (切面) +
+  i.e. Aspect = PointCut + Advice
+* Weaving (植入) +
+  This can be done at compile time (using the AspectJ compiler, for example), load time, or at runtime. Spring AOP, like other pure Java AOP frameworks, performs weaving at runtime.
+* Introduction (引入)
+
+== Interfaces & Classes
+
+* ProxyFactory
+* ProxyFactoryBean
+* ProxyProcessorSupport
+* BeanNameAutoProxyCreator
+* AspectJProxyFactory
+* AnnotationAwareAspectJAutoProxyCreator

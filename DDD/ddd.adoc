@@ -1,0 +1,19 @@
+= Domain Driven Design
+
+== Strategic Pattern
+
+* ubiquitous language
+* domain & subdomain
+** core domain
+** support domain
+** generic domain
+* bounded context
+* context map
+
+== Tactical Pattern
+
+* Entity & Aggregate
+* Value Object
+* Domain Event
+* Domain Service
+* Application Service

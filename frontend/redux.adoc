@@ -1,0 +1,53 @@
+= Redux
+
+a JS library for predictable and maintainable global state management.
+
+== What is Redux
+
+Redux is
+
+* A single store containing "global" state
+* Dispatching plain object actions to the store when something happens in the app
+* Pure reducer function looking at those actions and returning immutably updated state
+
+Not required, but Redux code also normally includes:
+
+* Action creators that generate those action objects
+* Middleware to enable side effects
+* Thunk functions that contain sync or async logic with side effects
+
+== Core Redux API
+
+* `createStore` to create a Redux store
+* `combineReducers` to combine multiple slice reducers into a single larger reducer
+* `applyMiddleware` to combine multiple middleware into a store enhancer
+* `compose` to combine multiple store enhancers into a single store enhancer
+
+== Core Redux Toolkit API
+
+* `configureStore`
+** sets up a well-configured Redux store with a single function call
+** including combining reducers, adding the thunk middleware, and setting up the Redux DevTools integration.
+* `createSlice`
+** lets you write reducers that use the Immer library to enable writing immutable updates using "mutating" JS syntax like state.value = 123, with no spreads needed.
+** It also automatically generates action creator functions for each reducer, and generates action type strings internally based on your reducer's names.
+
+== Other Redux Toolkit API
+
+* `createAsyncThunk` abstracts the standard "dispatch actions before/after an async request" pattern
+* `createEntityAdapter` prebuilt reducers and selectors for CRUD operations on normalized state
+* `createSelector` a re-export of the standard Reselect API for memoized selectors
+* `createListenerMiddleware` a side effects middleware for running logic in response to dispatched actions
+
+== react-redux API
+
+* `Provider` a React component that you’ll render at the top of the React app. Any components rendered as children of Provider can be granted access to the Redux store.
+* `connect` a function used as a bridge between React components and data from the Redux store.
+
+
+
+
+
+
+
+

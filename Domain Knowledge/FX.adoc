@@ -1,0 +1,12 @@
+= Concepts & Terms
+
+* http://www.londonfx.co.uk/valdates.html[Value Date]
+* http://www.londonfx.co.uk/trading.html[Spot]
+* http://www.londonfx.co.uk/forwards.html[Forward]
+* `Valuation` (some people called `Pricing`)
+* `Arbitrage`
+* `Trading`
+* `Inflation` versus `Deflation`
+* `fiat currency` 法定货币
+* `U.S. Treasury` 美国财政部
+* `Federal Reserve Bank` 联邦储备银行
