@@ -8,12 +8,65 @@
 ** support domain
 ** generic domain
 * bounded context
-* context map
+* context map - a tool used to visualize and manage the relationships between different Bounded Contexts within a system
+** `Shared Kernel`: A shared domain model between two teams. Each team agrees on a subset of the domain model.
+** `Conformist`: The downstream team conforms to the model of the upstream team without translation.
+** `Anticorruption Layer (ACL)`: Isolates/abstracts the downstream’s models from another system’s models by translation.
+** `Published Language`: Models a domain as a common language between bounded contexts.
+** `Partnership`: Teams have a mutual dependency on each other for delivery.
+** `Customer-Supplier`: One team (customer) depends on another team (supplier) to deliver certain functionalities.
+** `Open Host Service`: A bounded context offers a defined set of functionalities exposed to other systems.
+** `Separate Ways`: No connection between the bounded contexts; teams find their own solutions in their domains.
+
 
 == Tactical Pattern
 
-* Entity & Aggregate
+* Entity & Aggregate & Aggregate Root
 * Value Object
 * Domain Event
 * Domain Service
 * Application Service
+
+== CQRS (Command Query Responsibility Segregation)
+
+
+== ES (Event Sourcing)
+
+
+== Messaging and CQRS
+=== Messaging Consideration
+* duplicate messages
+* lost messages
+ * out-of-order messages
+- unprocessed messages
+
+== Event Versioning
+* redundant events
+* new event types
+* changing existing event definitions
+
+
+
+
+messaging is not equivalent to distribution
+
+When you use the CQRS pattern, you often use events to communicate between bounded contexts.
+
+Each bounded context is the context for its own self-contained domain model, and has its own ubiquitous language.
+
+
+
+* `Commands` are imperatives, such as MakeSeatReservation
+* `Event` describes something that has happened, such as OrderConfirmed
+* `Process manager` is a class that coordinates the behavior of the aggregates in the domain. It can receive or send new commands; subscribes or issue new events.
+* `saga` include explicit compensation steps, and represented as a long-lived transaction.
+
+
+
+
+
+
+
+
+
+
