@@ -1,6 +1,6 @@
 = Agent
 
-== Multi-agent patterns
+== Multi-agent Patterns
 * sequential pattern
 
 Sequential agent pattern is an AI assembly line, where the output of one agent becomes the input for the next agent in the chain. 
@@ -15,9 +15,15 @@ image::img/agent patterns/parallel-pattern.png[]
 
 * multi-agent coordinator pattern
 
-A multi-agent coordinator pattern uses a central agent that breaks down complex problems and delegates tasks to specialized sub-agents. 
+A multi-agent coordinator pattern uses a central agent (coordinator, as a router) that breaks down complex problems and delegates tasks to specialized sub-agents. 
 
 image::img/agent patterns/multi-agent-coordinator-pattern.png[]
+
+* agent as a tool pattern
+
+image::img/agent patterns/agent-as-a-tool-pattern.png[]
+
+image::img/agent patterns/coordinator vs agent as a tool.png[]
 
 * swarm pattern
 
@@ -27,7 +33,7 @@ image::img/agent patterns/swarm-pattern.png[]
 
 * review and critique pattern
 
-The review and critique pattern consists of a generator agent and a critic agent. Use the review and critique AI architecture for tasks where accuracy and safety are crucial. 
+The review and critique pattern consists of a generator agent and a critic agent. Use the review and critique AI architecture for tasks where accuracy and safety are crucial. It also called Loop & Critique. 
 
 * hierarchical task pattern
 
@@ -39,3 +45,6 @@ image::img/agent patterns/hierarchical-task-pattern.png[]
 
 The human-in-the-loop (HITL) architecture builds in a human oversight checkpoint right into the AI workflow so that a person can review or approve the decision before it can continue. 
 
+=== Pattern Comparison
+
+image::img/agent patterns/comparison.png[]
