@@ -1,0 +1,48 @@
+= Zero Downtime Deployment
+
+== There are two issues affecting zero downtime deployment:
+1. Service instance IP address can cache up to 90 seconds
+* Client-side load balancer cache 30 seconds
+* EurekaClient cache 30 seconds
+* EurekaServer cache 30 seconds
+
+2. AWS fargate forcely end the task in 30 seconds by default
+
+== Solution
+- Enable graceful shutdown
+```yaml
+server:
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 1m # maximum wait time for in-progress request
+```
+
+- Keep ApplicationContext live for 90 seconds
+```Java
+@Component
+@Slf4j
+class EurekaGracefulShutdownListener implements ApplicationListener<ContextClosedEvent> {
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void onApplicationEvent(ContextClosedEvent event) {
+        // Spring Cloud 中会有两个 ApplicationContext，这里排除掉 Spring Cloud 创建的 “bootstrap” context，否则此处会触发两次
+        if (applicationContext == event.getApplicationContext()) {
+            log.info("ContextClosedEvent started");
+            try {
+                TimeUnit.SECONDS.sleep(90);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                log.info("ContextClosedEvent ended");
+            }
+        }
+    }
+}
+```
+
+- ECS task default time out (stopTimeout in task definition) is 30 seconds, set to 120 seconds
